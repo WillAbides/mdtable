@@ -72,8 +72,8 @@ var testTables = []testTable{
 		name: "alignments-1",
 		table: buildTable(func(tbl *Table) {
 			tbl.SetAlignment(AlignCenter)
-			tbl.SetColumnMarkdownAlignment(1, AlignLeft)
-			tbl.SetColumnMarkdownAlignment(2, AlignRight)
+			tbl.SetColumnAlignment(1, AlignLeft)
+			tbl.SetColumnAlignment(2, AlignRight)
 			tbl.SetColumnTextAlignment(1, AlignCenter)
 			tbl.SetColumnHeaderAlignment(1, AlignLeft)
 			tbl.SetColumnMinWidth(0, 12)

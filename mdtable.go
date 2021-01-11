@@ -154,8 +154,8 @@ func (t *Table) SetColumnMinWidth(column, width int) {
 	t.minWidths[column] = width
 }
 
-// ColumnMarkdownAlignment returns the markdown alignment for a column
-func (t *Table) ColumnMarkdownAlignment(column int) Align {
+// ColumnAlignment returns the markdown alignment for a column
+func (t *Table) ColumnAlignment(column int) Align {
 	align := getColumnAlignment(t.mdAlignments, column)
 	if align != AlignDefault {
 		return align
@@ -163,8 +163,8 @@ func (t *Table) ColumnMarkdownAlignment(column int) Align {
 	return t.Alignment()
 }
 
-// SetColumnMarkdownAlignment sets the markdown alignment for a column
-func (t *Table) SetColumnMarkdownAlignment(column int, align Align) {
+// SetColumnAlignment sets the markdown alignment for a column
+func (t *Table) SetColumnAlignment(column int, align Align) {
 	t.mdAlignments = setColumnAlignment(t.mdAlignments, column, align)
 }
 
@@ -173,7 +173,7 @@ func (t *Table) SetColumnMarkdownAlignment(column int, align Align) {
 // Order of preference:
 //  1. value set with SetColumnTextAlignment
 //  2. value set with SetTextAlignment
-//  3. ColumnMarkdownAlignment(column)
+//  3. ColumnAlignment(column)
 //  4. DefaultTextAlignment (which is AlignLeft)
 func (t *Table) ColumnTextAlignment(column int) Align {
 	align := getColumnAlignment(t.textAlignments, column)
@@ -184,7 +184,7 @@ func (t *Table) ColumnTextAlignment(column int) Align {
 	if align != AlignDefault {
 		return align
 	}
-	align = t.ColumnMarkdownAlignment(column)
+	align = t.ColumnAlignment(column)
 	if align != AlignDefault {
 		return align
 	}
@@ -261,7 +261,7 @@ func (t *Table) renderColumnHeader(column int) string {
 	if width == 0 {
 		return "--"
 	}
-	align := t.ColumnMarkdownAlignment(column)
+	align := t.ColumnAlignment(column)
 	return align.headerPrefix() + strings.Repeat("-", width) + align.headerSuffix()
 }
 
