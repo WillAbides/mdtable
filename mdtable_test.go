@@ -88,7 +88,7 @@ func updateGolden() error {
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(filepath.Join("testdata", "tables"), 0700)
+	err = os.MkdirAll(filepath.Join("testdata", "tables"), 0o700)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func updateGolden() error {
 		table := testTables[i].table
 		got := table.Render()
 		got = append(got, '\n')
-		err = ioutil.WriteFile(filepath.Join("testdata", "tables", name+".md"), got, 0600)
+		err = ioutil.WriteFile(filepath.Join("testdata", "tables", name+".md"), got, 0o600)
 		if err != nil {
 			return err
 		}
