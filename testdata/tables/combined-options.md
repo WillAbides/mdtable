@@ -1,4 +1,4 @@
-|     Date     | Description              |          CV2 |    Amount    |
+|         Date | Description              |          CV2 |       Amount |
 |:------------:|:-------------------------|-------------:|:------------:|
 |   1/1/2014   |       Domain name        |         2233 |    $10.98    |
 |   1/1/2014   |     January Hosting      |         2233 |    $54.95    |

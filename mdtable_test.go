@@ -13,6 +13,20 @@ import (
 
 //go:generate go test . -write-golden
 
+func TestMain(m *testing.M) {
+	var err error
+	var writeGolden bool
+	flag.BoolVar(&writeGolden, "write-golden", false, "write golden files")
+	flag.Parse()
+	if writeGolden {
+		err = updateGolden()
+		if err != nil {
+			panic(err)
+		}
+	}
+	os.Exit(m.Run())
+}
+
 func TestAlign_fillCell(t *testing.T) {
 	runTest := func(align Align, width, padding int, s, want string) {
 		t.Helper()
@@ -41,18 +55,24 @@ func TestAlign_fillCell(t *testing.T) {
 	runTest(AlignCenter, 9, 0, "foo", "   foo   ")
 }
 
-type testTable struct {
-	name  string
-	table *Table
+func Test_cellValue(t *testing.T) {
+	require.Empty(t, cellValue(nil, 1, 1))
+	require.Empty(t, cellValue(exampleData, -1, 1))
+	require.Empty(t, cellValue(exampleData, 1, 10))
+	require.Empty(t, cellValue(exampleData, 10, 1))
+	require.Equal(t, "Domain name", cellValue(exampleData, 1, 1))
 }
 
-func buildTable(fn func(tbl *Table)) *Table {
-	table := new(Table)
-	table.SetData(exampleData)
-	if fn != nil {
-		fn(table)
+func TestGenerate(t *testing.T) {
+	for _, td := range goldenTests {
+		t.Run(td.name, func(t *testing.T) {
+			want, err := ioutil.ReadFile(filepath.Join("testdata", "tables", td.name+".md"))
+			require.NoError(t, err)
+			want = bytes.TrimSuffix(want, []byte{'\n'})
+			got := Generate(td.data, td.options...)
+			require.Equal(t, string(want), string(got))
+		})
 	}
-	return table
 }
 
 var exampleData = [][]string{
@@ -63,23 +83,72 @@ var exampleData = [][]string{
 	{"1/4/2014", "February Extra Bandwidth", "2233", "$30.00"},
 }
 
-var testTables = []testTable{
+var goldenTests = []struct {
+	name    string
+	options []Option
+	data    [][]string
+}{
 	{
-		name:  "defaults",
-		table: buildTable(nil),
+		name: "defaults",
+		data: exampleData,
 	},
 	{
-		name: "alignments-1",
-		table: buildTable(func(tbl *Table) {
-			tbl.SetAlignment(AlignCenter)
-			tbl.SetColumnAlignment(1, AlignLeft)
-			tbl.SetColumnAlignment(2, AlignRight)
-			tbl.SetColumnTextAlignment(1, AlignCenter)
-			tbl.SetColumnHeaderAlignment(1, AlignLeft)
-			tbl.SetColumnMinWidth(0, 12)
-			tbl.SetColumnMinWidth(2, 12)
-			tbl.SetColumnMinWidth(3, 12)
-		}),
+		name: "combined-options",
+		data: exampleData,
+		options: []Option{
+			Alignment(AlignCenter),
+			ColumnAlignment(1, AlignLeft),
+			ColumnAlignment(2, AlignRight),
+			ColumnTextAlignment(1, AlignCenter),
+			HeaderAlignment(AlignRight),
+			ColumnHeaderAlignment(1, AlignLeft),
+			ColumnMinWidth(0, 12),
+			ColumnMinWidth(2, 12),
+			ColumnMinWidth(3, 12),
+		},
+	},
+	{
+		name: "empty",
+	},
+	{
+		name:    "Alignment",
+		data:    exampleData,
+		options: []Option{Alignment(AlignRight)},
+	},
+	{
+		name:    "HeaderAlignment",
+		data:    exampleData,
+		options: []Option{HeaderAlignment(AlignRight)},
+	},
+	{
+		name:    "TextAlignment",
+		data:    exampleData,
+		options: []Option{TextAlignment(AlignRight)},
+	},
+	{
+		name:    "ColumnAlignment",
+		data:    exampleData,
+		options: []Option{ColumnAlignment(1, AlignRight)},
+	},
+	{
+		name:    "ColumnTextAlignment",
+		data:    exampleData,
+		options: []Option{ColumnTextAlignment(1, AlignRight)},
+	},
+	{
+		name:    "ColumnHeaderAlignment",
+		data:    exampleData,
+		options: []Option{ColumnHeaderAlignment(1, AlignRight)},
+	},
+	{
+		name:    "ColumnMinWidth",
+		data:    exampleData,
+		options: []Option{ColumnMinWidth(0, 40)},
+	},
+	{
+		name:    "ColumnMinWidth-small",
+		data:    exampleData,
+		options: []Option{ColumnMinWidth(0, 2)},
 	},
 }
 
@@ -92,41 +161,13 @@ func updateGolden() error {
 	if err != nil {
 		return err
 	}
-	for i := range testTables {
-		name := testTables[i].name
-		table := testTables[i].table
-		got := table.Render()
+	for _, gt := range goldenTests {
+		got := Generate(gt.data, gt.options...)
 		got = append(got, '\n')
-		err = ioutil.WriteFile(filepath.Join("testdata", "tables", name+".md"), got, 0o600)
+		err = ioutil.WriteFile(filepath.Join("testdata", "tables", gt.name+".md"), got, 0o600)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-func TestMain(m *testing.M) {
-	var err error
-	var writeGolden bool
-	flag.BoolVar(&writeGolden, "write-golden", false, "write golden files")
-	flag.Parse()
-	if writeGolden {
-		err = updateGolden()
-		if err != nil {
-			panic(err)
-		}
-	}
-	os.Exit(m.Run())
-}
-
-func TestRender(t *testing.T) {
-	for _, td := range testTables {
-		t.Run(td.name, func(t *testing.T) {
-			want, err := ioutil.ReadFile(filepath.Join("testdata", "tables", td.name+".md"))
-			require.NoError(t, err)
-			want = bytes.TrimSuffix(want, []byte{'\n'})
-			got := td.table.Render()
-			require.Equal(t, string(want), string(got))
-		})
-	}
 }

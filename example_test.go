@@ -16,10 +16,9 @@ func Example() {
 		{"Iris", "Gorilla", "8"},
 		{"Ava Gayle", "Sloth", "972.5"},
 	}
-	table := mdtable.New(data)
 
-	// Table's String() renders the table as markdown
-	fmt.Println(table)
+	b := mdtable.Generate(data)
+	fmt.Println(string(b))
 
 	// Output:
 	// | Name      | Favorite Animal | Lucky Number |
@@ -29,48 +28,67 @@ func Example() {
 	// | Ava Gayle | Sloth           | 972.5        |
 }
 
-func Example_alignment() {
-	table := mdtable.New([][]string{
+//nolint:gocritic // this appends are split out as a demonstration
+func Example_options() {
+	// This adds options one at a time and shows what the output of
+	// mdtable.Generate would be after each option is added.
+
+	data := [][]string{
 		{"Name", "Favorite Animal", "Lucky Number"},
 		{"Dave", "Elephant", "7"},
 		{"Iris", "Gorilla", "8"},
 		{"Ava Gayle", "Sloth", "972.5"},
-	})
+	}
+
+	var options []mdtable.Option
 
 	// Right align the whole table
-	table.SetAlignment(mdtable.AlignRight)
+	options = append(options,
+		mdtable.Alignment(mdtable.AlignRight),
+	)
 
-	// |      Name | Favorite Animal | Lucky Number |
-	// |----------:|----------------:|-------------:|
-	// |      Dave |        Elephant |            7 |
-	// |      Iris |         Gorilla |            8 |
-	// | Ava Gayle |           Sloth |        972.5 |
+	/*
+		|      Name | Favorite Animal | Lucky Number |
+		|----------:|----------------:|-------------:|
+		|      Dave |        Elephant |            7 |
+		|      Iris |         Gorilla |            8 |
+		| Ava Gayle |           Sloth |        972.5 |
+	*/
 
 	// Left align header text
-	table.SetHeaderAlignment(mdtable.AlignLeft)
+	options = append(options,
+		mdtable.HeaderAlignment(mdtable.AlignLeft),
+	)
 
-	// | Name      | Favorite Animal | Lucky Number |
-	// |----------:|----------------:|-------------:|
-	// |      Dave |        Elephant |            7 |
-	// |      Iris |         Gorilla |            8 |
-	// | Ava Gayle |           Sloth |        972.5 |
+	/*
+		| Name      | Favorite Animal | Lucky Number |
+		|----------:|----------------:|-------------:|
+		|      Dave |        Elephant |            7 |
+		|      Iris |         Gorilla |            8 |
+		| Ava Gayle |           Sloth |        972.5 |
+	*/
 
-	// Set Favorite Animal's (offset 1) minimum width to 20
-	table.SetColumnMinWidth(1, 20)
+	// Set Favorite Animal's (offset 1) minimum width to 20 and center its text
+	options = append(options,
+		mdtable.ColumnMinWidth(1, 20),
+		mdtable.ColumnTextAlignment(1, mdtable.AlignCenter),
+	)
 
-	// Center align Favorite Animal's text
-	table.SetColumnTextAlignment(1, mdtable.AlignCenter)
+	/*
+		| Name      | Favorite Animal      | Lucky Number |
+		|----------:|---------------------:|-------------:|
+		|      Dave |       Elephant       |            7 |
+		|      Iris |       Gorilla        |            8 |
+		| Ava Gayle |        Sloth         |        972.5 |
+	*/
 
-	// | Name      | Favorite Animal      | Lucky Number |
-	// |----------:|---------------------:|-------------:|
-	// |      Dave |       Elephant       |            7 |
-	// |      Iris |       Gorilla        |            8 |
-	// | Ava Gayle |        Sloth         |        972.5 |
+	options = append(options,
+		mdtable.ColumnAlignment(0, mdtable.AlignLeft), // Left align Name
+	)
 
-	// Left align Name
-	table.SetColumnAlignment(0, mdtable.AlignLeft)
+	b := mdtable.Generate(data, options...)
+	fmt.Println(string(b))
 
-	fmt.Println(table)
 	// Output:
 	// | Name      | Favorite Animal      | Lucky Number |
 	// |:----------|---------------------:|-------------:|
