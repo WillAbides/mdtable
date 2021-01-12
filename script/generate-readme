@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+CDPATH="" cd -- "$(dirname -- "$(dirname -- "$0")")"
+
+pattern="<!--- start godoc --->*<!--- end godoc --->"
+
+substitution="$(cat <<EOF
+<!--- start godoc --->
+$(script/goreadme | tail -n +3)
+<!--- end godoc --->
+EOF
+)"
+
+readme="$(cat README.md)"
+echo "${readme//$pattern/$substitution}" > README.md

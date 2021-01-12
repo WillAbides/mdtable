@@ -1,3 +1,7 @@
+/*
+Package mdtable generates markdown tables from string slices with formatting options for alignment and column width.
+See examples for usage.
+*/
 package mdtable
 
 import (
