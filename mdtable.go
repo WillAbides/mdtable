@@ -88,6 +88,13 @@ type Table struct {
 	minWidths        []int
 }
 
+// New returns a new *Table
+func New(data [][]string) *Table {
+	return &Table{
+		data: data,
+	}
+}
+
 // Data returns the cell values for this table.
 //
 // The top level slice are rows. The first row is the header data.
@@ -254,6 +261,10 @@ func (t *Table) Render() []byte {
 		buf.WriteString("\n" + t.renderRow(row, t.ColumnTextAlignment))
 	}
 	return buf.Bytes()
+}
+
+func (t *Table) String() string {
+	return string(t.Render())
 }
 
 func (t *Table) renderColumnHeader(column int) string {
