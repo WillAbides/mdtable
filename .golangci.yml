@@ -8,6 +8,9 @@ issues:
         - dupl
         - gosec
         - goconst
+    - path: example_test\.go
+      linters:
+        - gocritic
 linters:
   enable:
     - golint

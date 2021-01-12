@@ -28,7 +28,6 @@ func Example() {
 	// | Ava Gayle | Sloth           | 972.5        |
 }
 
-//nolint:gocritic // this appends are split out as a demonstration
 func Example_options() {
 	// This adds options one at a time and shows what the output of
 	// mdtable.Generate would be after each option is added.
